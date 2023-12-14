@@ -1,0 +1,7 @@
+langchain
+transformers
+sentence-transformers
+pypdf
+google-cloud
+#intel_extension_for_pytorch
+torch
