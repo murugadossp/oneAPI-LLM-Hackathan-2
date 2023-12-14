@@ -1,5 +1,6 @@
 import random
 import torch
+import intel_extension_for_pytorch as ipex
 
 
 # intel_extension_for_pytorch

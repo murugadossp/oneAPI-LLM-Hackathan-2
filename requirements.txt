@@ -3,5 +3,6 @@ transformers
 sentence-transformers
 pypdf
 google-cloud
-#intel_extension_for_pytorch
+intel-extension-for-pytorch
+intel-extension-for-transformers
 torch
