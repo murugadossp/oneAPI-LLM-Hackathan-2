@@ -1,4 +1,6 @@
 # Import necessary modules and classes
+import time
+
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import intel_extension_for_pytorch as ipex
 from device import *
@@ -31,6 +33,7 @@ class ChatBotModel:
         - torch_dtype: The data type to use in the model. Default is torch.bfloat16.
         - optimize: If True, ipex is used to optimized the model
         """
+        start_time = time.time()
         self.tokenizer = None
         self.model = None
         self.torch_dtype = torch_dtype
@@ -57,14 +60,18 @@ class ChatBotModel:
             info(f"Intel ipex Optimizer is not enabled as per request")
 
         info("ChatBotModel Initialization Complete")
+        info(f"Time Taken for model_init: {round((time.time() - start_time),2)} seconds")
 
     def tokenizer_init(self, model_id_or_path):
+        start_time = time.time()
         info(f"AutoTokenizer.from_pretrained model_id_or_path : {model_id_or_path} ")
         self.tokenizer = AutoTokenizer.from_pretrained(
             model_id_or_path, trust_remote_code=True
         )
+        info(f"Time Taken for tokenizer_init: {round((time.time() - start_time),2)} seconds")
 
     def model_init(self, model_id_or_path):
+        start_time = time.time()
         info(f"model_init: .AutoModelForSeq2SeqLM.from_pretrained model_id_or_path : {model_id_or_path} ")
         self.model = (
             AutoModelForSeq2SeqLM.from_pretrained(
@@ -77,6 +84,7 @@ class ChatBotModel:
             .to(self.device)
             .eval()
         )
+        info(f"Time Taken for model_init: {round((time.time() - start_time),2)} seconds")
 
     def print_params(self):
         info(f"torch_dtype : {self.torch_dtype}")

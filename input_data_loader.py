@@ -7,6 +7,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import SentenceTransformerEmbeddings
 from langchain.vectorstores import Chroma
 
+from chatbot_model import ChatBotModel
 from loggers import *
 
 PERSISTENT_DIR_PATH = "/home/sdp/vector_db/chroma_db"
@@ -73,12 +74,13 @@ class InputDataLoader:
         info(f"Making the Chroma vector database persistent")
         self.db.persist()
         info(f"Total Time taken for Converting the Documents to Embeddings and store in the database: "
-             f"{int(time.time() - start_time)}")
+             f"{round((time.time() - start_time),2)}")
 
 
 if __name__ == '__main__':
     input_loader = InputDataLoader()
     input_loader.core()
+
 
     # info(f"input_loader texts: {input_loader.texts}")
     # info(f"input_loader embeddings: {input_loader.embeddings}")
