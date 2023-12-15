@@ -53,7 +53,7 @@ class ChatBotModel:
             self.model_init(self.local_model_path)
         except (OSError, ValueError, EnvironmentError) as e:
             info(f"Tokenizer / model not found locally. "
-                 f"Downloading tokenizer / model for {self.model_id_or_path} to cache...: {e}")
+                 f"Downloading tokenizer / model for {self.model_id_or_path} to cache...: ")
             self.tokenizer_init(self.model_id_or_path)
             self.model_init(self.model_id_or_path)
 
