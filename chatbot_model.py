@@ -9,9 +9,6 @@ from loggers import *
 
 MODEL_CACHE_PATH = "~/GenAI/llm_models"
 
-# Below setting will enable Hugging face model downloaded from remote to store in this path
-os.environ['TRANSFORMERS_CACHE'] = MODEL_CACHE_PATH
-
 
 class ChatBotModel:
     """
@@ -76,7 +73,10 @@ class ChatBotModel:
 
     def tokenizer_init(self, model_id_or_path):
         info(f"AutoTokenizer.from_pretrained model_id_or_path : {model_id_or_path} ")
-        self.tokenizer = AutoTokenizer.from_pretrained(model_id_or_path, trust_remote_code=True)
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            model_id_or_path, trust_remote_code=True,
+            cache_dir=MODEL_CACHE_PATH
+        )
 
     def model_init(self, model_id_or_path):
         info(f"model_init: .AutoModelForSeq2SeqLM.from_pretrained model_id_or_path : {model_id_or_path} ")
@@ -86,7 +86,8 @@ class ChatBotModel:
                 device_map="auto",
                 low_cpu_mem_usage=True,
                 trust_remote_code=True,
-                torch_dtype=torch.float32
+                torch_dtype=torch.float32,
+                cache_dir=MODEL_CACHE_PATH
             )
             .to(self.device)
             .eval()
