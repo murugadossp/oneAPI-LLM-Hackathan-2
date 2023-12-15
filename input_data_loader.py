@@ -73,12 +73,12 @@ class InputDataLoader:
         info(f"Making the Chroma vector database persistent")
         self.db.persist()
         info(f"Total Time taken for Converting the Documents to Embeddings and store in the database: "
-             f"{time.time() - start_time}")
+             f"{int(time.time() - start_time)}")
 
 
 if __name__ == '__main__':
     input_loader = InputDataLoader()
     input_loader.core()
 
-    info(f"input_loader texts: {input_loader.texts}")
-    info(f"input_loader embeddings: {input_loader.embeddings}")
+    # info(f"input_loader texts: {input_loader.texts}")
+    # info(f"input_loader embeddings: {input_loader.embeddings}")
