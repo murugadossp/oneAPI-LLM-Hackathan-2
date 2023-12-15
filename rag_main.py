@@ -140,7 +140,7 @@ class ChatBot:
 
             # Execute the query using the QA chain
             info("Executing query using the QA chain")
-            llm_response = self.qa_chain({"query": input_query})
+            llm_response = self.qa_chain_optimized({"query": input_query})
 
             # Print the response
             info(llm_response['result'])
