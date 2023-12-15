@@ -78,6 +78,6 @@ if __name__ == '__main__':
     input_loader.core()
     # embeddings = SentenceTransformerEmbeddings(model_name="multi-qa-mpnet-base-dot-v1")
     db = Chroma(persist_directory=PERSISTENT_DIR_PATH, embedding_function=input_loader.embeddings)
-    chat_bot = ChatBot(chat_bot_model.model, db)
+    chat_bot = ChatBot(chat_bot_model, db)
     # chat_bot.launch_gradio_interface()
     chat_bot.front_end_local()
