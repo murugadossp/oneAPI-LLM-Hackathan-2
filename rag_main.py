@@ -3,13 +3,12 @@ import time
 
 import gradio as gr
 from langchain.chains import RetrievalQA
-from langchain_community.embeddings import SentenceTransformerEmbeddings
-from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
-from langchain_community.vectorstores.chroma import Chroma
+from langchain.embeddings import HuggingFaceEmbeddings, SentenceTransformerEmbeddings
+from langchain.llms import HuggingFacePipeline
+from langchain.vectorstores import Chroma
 from transformers import pipeline
 
 from chatbot_model import ChatBotModel
-from input_data_loader import InputDataLoader
 
 from loggers import *
 

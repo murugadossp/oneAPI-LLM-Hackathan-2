@@ -49,13 +49,13 @@ class ChatBotModel:
 
         if optimize:
             info(f"Enabling Intel ipex Optimizer")
-            if hasattr(ipex, "optimize_transformers"):
-                try:
-                    ipex.optimize_transformers(self.model, dtype=self.torch_dtype)
-                except:
-                    ipex.optimize(self.model, dtype=self.torch_dtype)
-            else:
-                ipex.optimize(self.model, dtype=self.torch_dtype)
+            # if hasattr(ipex, "optimize_transformers"):
+            #     try:
+            #         ipex.optimize_transformers(self.model, dtype=self.torch_dtype)
+            #     except:
+            #         ipex.optimize(self.model, dtype=self.torch_dtype)
+            # else:
+            ipex.optimize(self.model, dtype=self.torch_dtype)
         else:
             info(f"Intel ipex Optimizer is not enabled as per request")
 
