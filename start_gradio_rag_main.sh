@@ -1,0 +1,1 @@
+nohup python rag_main.py > ~/ngrok_logs/gradio_rag_main.log 2>&1 &
