@@ -1,25 +1,32 @@
 # Import necessary modules and classes
 import os
-import time
 
+from langchain.vectorstores import Chroma
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import pipeline
+from langchain.llms import HuggingFacePipeline
+from langchain.embeddings import SentenceTransformerEmbeddings
+from langchain.chains import RetrievalQA
 from langchain.document_loaders import PyPDFLoader, DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings import SentenceTransformerEmbeddings
-from langchain.vectorstores import Chroma
-
+import intel_extension_for_pytorch as ipex
+from device import *
 from loggers import *
+
+MODEL_CACHE_PATH = "/home/common/data/Big_Data/GenAI/llm_models"
+import torch
 
 PERSISTENT_DIR_PATH = "/home/sdp/vector_db/chroma_db"
 
 
 class InputDataLoader:
     """
-    InputDataLoader is a class for loading the PDF documents given in a directory
+    ChatBotModel is a class for Setting up the pretrained tokenizer and model.
 
     Attributes:
-    - persistent_db_dir: Directory Path for DB to store
-    - chunk_size: chunk_size default 1200 bytes .
-    - chunk_overlap : 200 bytes
+    - model_id_or_path: model Id for text generation. Default is ""MBZUAI/LaMini-Flan-T5-783M""
+    - torch_dtype: The data type to use in the model.
+    - optimize : If True Intel Optimizer for pytorch is used.
     """
 
     def __init__(self,
@@ -30,8 +37,6 @@ class InputDataLoader:
         # Define the directory where the Chroma
         # database will persist its data
         # Make sure the directory exists, create if it doesn't
-        self.db = None
-        self.embeddings = None
         self.texts = None
         self.persistent_db_dir = persistent_db_dir
         self.chunk_size = chunk_size
@@ -42,6 +47,8 @@ class InputDataLoader:
             os.makedirs(persistent_db_dir)
 
     def document_loader(self):
+        # Initialize a directory loader to load PDF documents from a directory
+
         # Initialize a directory loader to load PDF documents from a directory
         loader = DirectoryLoader("data",
                                  glob="./*.pdf",
@@ -56,29 +63,10 @@ class InputDataLoader:
         # Split the loaded documents into chunks
         self.texts = text_splitter.split_documents(documents)
 
-    def core(self):
-        start_time = time.time()
-        # Get the Documents to texts
-        self.document_loader()
-        # Creating a Vector DB using Chroma DB and SentenceTransformerEmbeddings
-        # Initialize SentenceTransformerEmbeddings with a pre-trained model
-        info("Initializing SentenceTransformerEmbeddings")
-        self.embeddings = SentenceTransformerEmbeddings(model_name="multi-qa-mpnet-base-dot-v1")
-
-        # Create a Chroma vector database from the text chunks
-        info("Creating a Chroma vector database from the text chunks")
-        self.db = Chroma.from_documents(self.texts,
-                                        self.embeddings,
-                                        persist_directory=self.persistent_db_dir)
-        info(f"Making the Chroma vector database persistent")
-        self.db.persist()
-        info(f"Total Time taken for Converting the Documents to Embeddings and store in the database: "
-             f"{time.time() - start_time}")
+   
 
 
 if __name__ == '__main__':
-    input_loader = InputDataLoader()
-    input_loader.core()
-
-    info(f"input_loader texts: {input_loader.texts}")
-    info(f"input_loader embeddings: {input_loader.embeddings}")
+    chat_bot_model = ChatBotModel()
+    info(f"chat_bot_model tokenizer: {chat_bot_model.tokenizer}")
+    info(f"chat_bot_model model: {chat_bot_model.model}")
