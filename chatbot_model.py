@@ -9,6 +9,9 @@ from loggers import *
 
 MODEL_CACHE_PATH = "~/GenAI/llm_models"
 
+# Below setting will enable Hugging face model downloaded from remote to store in this path
+os.environ['TRANSFORMERS_CACHE'] = MODEL_CACHE_PATH
+
 
 class ChatBotModel:
     """
@@ -99,5 +102,5 @@ class ChatBotModel:
 
 if __name__ == '__main__':
     chat_bot_model = ChatBotModel()
-    info(f"chat_bot_model tokenizer: {chat_bot_model.tokenizer}")
-    info(f"chat_bot_model model: {chat_bot_model.model}")
+    # info(f"chat_bot_model tokenizer: {chat_bot_model.tokenizer}")
+    # info(f"chat_bot_model model: {chat_bot_model.model}")
