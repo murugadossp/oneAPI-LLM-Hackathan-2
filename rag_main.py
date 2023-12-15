@@ -7,6 +7,7 @@ from langchain_community.vectorstores.chroma import Chroma
 from transformers import pipeline
 
 from chatbot_model import ChatBotModel
+from input_data_loader import InputDataLoader
 
 from loggers import *
 
@@ -73,8 +74,10 @@ class ChatBot:
 if __name__ == '__main__':
     # Usage
     chat_bot_model = ChatBotModel()
-    embeddings = SentenceTransformerEmbeddings(model_name="multi-qa-mpnet-base-dot-v1")
-    db = Chroma(persist_directory=PERSISTENT_DIR_PATH, embedding_function=embeddings)
+    input_loader = InputDataLoader()
+    input_loader.core()
+    # embeddings = SentenceTransformerEmbeddings(model_name="multi-qa-mpnet-base-dot-v1")
+    db = Chroma(persist_directory=PERSISTENT_DIR_PATH, embedding_function=input_loader.embeddings)
     chat_bot = ChatBot(chat_bot_model.model, db)
     # chat_bot.launch_gradio_interface()
     chat_bot.front_end_local()
