@@ -1,6 +1,4 @@
 # Import necessary modules and classes
-import time
-
 import gradio as gr
 from langchain.chains import RetrievalQA
 from langchain_community.embeddings import SentenceTransformerEmbeddings
@@ -18,7 +16,6 @@ PERSISTENT_DIR_PATH = "/home/sdp/vector_db/chroma_db"
 class ChatBot:
     def __init__(self, chat_bot_model, db):
         # Create a text generation pipeline
-        self.conversation_history = None
         self.pipe = pipeline(
             'text2text-generation',
             model=chat_bot_model.model,
@@ -39,38 +36,13 @@ class ChatBot:
             return_source_documents=True,
         )
 
-    def front_end(self, input_text):
-        # Assuming you have a variable to store conversation history
-        if not hasattr(self, 'conversation_history'):
-            self.conversation_history = ""
+    def front_end(self, input_query):
+        # Removed the loop and input since Gradio handles this
+        if input_query.upper() == 'EXIT':
+            return "Exiting..."
 
-        # Add user input to conversation history
-        self.conversation_history += f"You: {input_text}\n"
-
-        # Measure inference time
-        start_time = time.time()
-        response = self.generate_response(input_text)  # Your function to generate response
-        end_time = time.time()
-        inference_time = end_time - start_time
-
-        # Add response to conversation history
-        self.conversation_history += f"NextGenAI Law Bot: {response}\n"
-
-        # Combine response and inference time
-        display_text = f"{self.conversation_history}\n(Inference time: {inference_time:.2f} seconds)"
-
-        return display_text
-
-    def generate_response(self, input_text):
-        llm_response = self.qa_chain({"query": input_text})
+        llm_response = self.qa_chain({"query": input_query})
         return llm_response['result']
-
-    # def front_end(self, input_text):
-    #     # Removed the loop and input since Gradio handles this
-    #     if input_text.upper() == 'EXIT':
-    #         return "Exiting..."
-    #     self.generate_response(input_text)
-
 
     def front_end_local(self):
         while True:
@@ -88,23 +60,13 @@ class ChatBot:
             # Print the response
             info(llm_response['result'])
 
-    # def launch_gradio_interface(self):
-    #     interface = gr.Interface(
-    #         fn=self.front_end,
-    #         inputs="text",
-    #         outputs="text",
-    #         title="ChatBot Interface",
-    #         description="Enter your query below:"
-    #     )
-    #     interface.launch(server_port=7902)
-
     def launch_gradio_interface(self):
         interface = gr.Interface(
             fn=self.front_end,
             inputs="text",
             outputs="text",
-            title="NextGenAI ChatBot",
-            description="Enter your query about Indian Constitution and Sections of the law"
+            title="ChatBot Interface",
+            description="Enter your query below:"
         )
         interface.launch(server_port=7902)
 
