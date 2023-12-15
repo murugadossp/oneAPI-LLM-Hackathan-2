@@ -74,7 +74,7 @@ class ChatBot:
         self.llm_optimized = HuggingFacePipeline(pipeline=self.pipe_optimized)
         # Create a RetrievalQA chain
         self.qa_chain_optimized = RetrievalQA.from_chain_type(
-            llm=self.llm_not_optimized,
+            llm=self.llm_optimized,
             chain_type='stuff',
             retriever=self.db.as_retriever(search_type="similarity", search_kwargs={"k": 2}),
             return_source_documents=True,
