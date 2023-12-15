@@ -1,4 +1,6 @@
 # Import necessary modules and classes
+import time
+
 import gradio as gr
 from langchain.chains import RetrievalQA
 from langchain_community.embeddings import SentenceTransformerEmbeddings
@@ -13,9 +15,13 @@ from loggers import *
 
 PERSISTENT_DIR_PATH = "/home/sdp/vector_db/chroma_db"
 
+
 class ChatBot:
+    chat_logs = []
+
     def __init__(self, chat_bot_model, db):
         # Create a text generation pipeline
+        self.conversation_history = ""
         self.pipe = pipeline(
             'text2text-generation',
             model=chat_bot_model.model,
@@ -36,12 +42,42 @@ class ChatBot:
             return_source_documents=True,
         )
 
-    def front_end(self, input_query):
-        # Removed the loop and input since Gradio handles this
-        if input_query.upper() == 'EXIT':
-            return "Exiting..."
+    def front_end(self, input_text):
+        if "exit" in input_text.lower():
+            return f"Summary so far: \n\n {self.chat_logs} \n\n"
 
-        llm_response = self.qa_chain({"query": input_query})
+        # Assuming you have a variable to store conversation history
+        if not hasattr(self, 'conversation_history'):
+            self.conversation_history = ""
+
+        # Add user input to conversation history
+        self.conversation_history += f"You: {input_text}\n\n"
+
+        # Measure inference time
+        start_time = time.time()
+        response = self.generate_response(input_text)  # Your function to generate response
+        end_time = time.time()
+        inference_time = end_time - start_time
+        self.chat_logs.append(
+            {
+                "query": input_text,
+                "response": response,
+                "inference_time": inference_time,
+                "optimization": True
+            }
+        )
+        # Add response to conversation history
+        self.conversation_history += (f"NextGenAI Law Bot: {response}\n\n "
+                                      f"inference_time: {inference_time}"
+                                      f"\n\n")
+
+        # Combine response and inference time
+        display_text = f"{self.conversation_history}\n(Inference time: {inference_time:.2f} seconds)"
+
+        return display_text
+
+    def generate_response(self, input_text):
+        llm_response = self.qa_chain({"query": input_text})
         return llm_response['result']
 
     def front_end_local(self):
@@ -65,8 +101,8 @@ class ChatBot:
             fn=self.front_end,
             inputs="text",
             outputs="text",
-            title="ChatBot Interface",
-            description="Enter your query below:"
+            title="NextGenAI ChatBot",
+            description="Enter your query about Indian Constitution and Sections of the law"
         )
         interface.launch(server_port=7902)
 

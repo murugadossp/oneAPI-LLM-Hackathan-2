@@ -19,28 +19,80 @@ PERSISTENT_DIR_PATH = "/home/sdp/vector_db/chroma_db"
 class ChatBot:
     chat_logs = []
 
-    def __init__(self, chat_bot_model, db):
+    def __init__(self):
         # Create a text generation pipeline
+
+        self.llm_optimized = None
+        self.qa_chain_optimized = None
+        self.pipe_optimized = None
+        self.qa_chain_not_optimized = None
+        self.llm_not_optimized = None
+        self.pipe_not_optimized = None
+        self.chat_bot_model_optimized = ChatBotModel(optimize=True)
+        self.chat_bot_model_not_optimized = ChatBotModel(optimize=False)
+
+        embeddings = SentenceTransformerEmbeddings(model_name="multi-qa-mpnet-base-dot-v1")
+        self.db = Chroma(persist_directory=PERSISTENT_DIR_PATH, embedding_function=embeddings)
+
         self.conversation_history = ""
-        self.pipe = pipeline(
+
+    def rag_not_optimized(self, max_length=512,
+                          temperature=0.3,
+                          top_p=0.95):
+        self.pipe_not_optimized = pipeline(
             'text2text-generation',
-            model=chat_bot_model.model,
-            tokenizer=chat_bot_model.tokenizer,
-            max_length=512,
+            model=self.chat_bot_model_not_optimized.model,
+            tokenizer=self.chat_bot_model_not_optimized.tokenizer,
+            max_length=max_length,
             do_sample=True,
-            temperature=0.3,
-            top_p=0.95
+            temperature=temperature,
+            top_p=top_p
         )
         # Initialize a local language model pipeline
-        self.local_llm = HuggingFacePipeline(pipeline=self.pipe)
-
+        self.llm_not_optimized = HuggingFacePipeline(pipeline=self.pipe_not_optimized)
         # Create a RetrievalQA chain
-        self.qa_chain = RetrievalQA.from_chain_type(
-            llm=self.local_llm,
+        self.qa_chain_not_optimized = RetrievalQA.from_chain_type(
+            llm=self.llm_not_optimized,
             chain_type='stuff',
-            retriever=db.as_retriever(search_type="similarity", search_kwargs={"k": 2}),
+            retriever=self.db.as_retriever(search_type="similarity", search_kwargs={"k": 2}),
             return_source_documents=True,
         )
+
+    def rag_optimized(self, max_length=512,
+                      temperature=0.3,
+                      top_p=0.95):
+        self.pipe_optimized = pipeline(
+            'text2text-generation',
+            model=self.chat_bot_model_optimized.model,
+            tokenizer=self.chat_bot_model_optimized.tokenizer,
+            max_length=max_length,
+            do_sample=True,
+            temperature=temperature,
+            top_p=top_p
+        )
+        # Initialize a local language model pipeline
+        self.llm_optimized = HuggingFacePipeline(pipeline=self.pipe_optimized)
+        # Create a RetrievalQA chain
+        self.qa_chain_optimized = RetrievalQA.from_chain_type(
+            llm=self.llm_not_optimized,
+            chain_type='stuff',
+            retriever=self.db.as_retriever(search_type="similarity", search_kwargs={"k": 2}),
+            return_source_documents=True,
+        )
+
+    def generate_response_optimized(self, input_text):
+        start_time = time.time()
+        llm_response = self.qa_chain_optimized({"query": input_text})
+        end_time = time.time()
+        inference_time = end_time - start_time
+        return llm_response['result'], round(inference_time,2)
+
+    def generate_response_not_optimized(self, input_text):
+        start_time = time.time()
+        llm_response = self.qa_chain_not_optimized({"query": input_text})
+        end_time = time.time()
+        inference_time = end_time - start_time
+        return llm_response['result'], round(inference_time,2)
 
     def front_end(self, input_text):
         if "exit" in input_text.lower():
@@ -53,32 +105,29 @@ class ChatBot:
         # Add user input to conversation history
         self.conversation_history += f"You: {input_text}\n\n"
 
-        # Measure inference time
-        start_time = time.time()
-        response = self.generate_response(input_text)  # Your function to generate response
-        end_time = time.time()
-        inference_time = end_time - start_time
+        resp_ipex, inference_ipex = self.generate_response_optimized(input_text)  # Your function to generate response
+        resp_no_ipex, inference_no_ipex = self.generate_response_optimized(input_text)  # Your function to generate response
         self.chat_logs.append(
             {
                 "query": input_text,
-                "response": response,
-                "inference_time": inference_time,
-                "optimization": True
+                "inference_ipex": inference_ipex,
+                "inference_no_ipex": inference_no_ipex,
+                "response_ipex": resp_ipex,
+                "response_no_ipex": resp_no_ipex,
+
             }
         )
         # Add response to conversation history
-        self.conversation_history += (f"NextGenAI Law Bot: {response}\n\n "
-                                      f"inference_time: {inference_time}"
-                                      f"\n\n")
+        self.conversation_history += (f"NextGenAI Law Bot (ipex): {resp_ipex}\n\n "
+                                      f"inference_time (ipex)   : {inference_ipex} seconds\n\n"
+                                      f"NextGenAI Law Bot (No-ipex): {resp_no_ipex}\n\n "
+                                      f"inference_time (No-ipex)   : {inference_no_ipex} seconds\n\n"
+                                     )
 
         # Combine response and inference time
-        display_text = f"{self.conversation_history}\n(Inference time: {inference_time:.2f} seconds)"
+        display_text = f"{self.conversation_history}"
 
         return display_text
-
-    def generate_response(self, input_text):
-        llm_response = self.qa_chain({"query": input_text})
-        return llm_response['result']
 
     def front_end_local(self):
         while True:
@@ -109,9 +158,7 @@ class ChatBot:
 
 if __name__ == '__main__':
     # Usage
-    chat_bot_model = ChatBotModel()
-    embeddings = SentenceTransformerEmbeddings(model_name="multi-qa-mpnet-base-dot-v1")
-    db = Chroma(persist_directory=PERSISTENT_DIR_PATH, embedding_function=embeddings)
-    chat_bot = ChatBot(chat_bot_model, db)
+
+    chat_bot = ChatBot()
     chat_bot.launch_gradio_interface()
     # chat_bot.front_end_local()
