@@ -82,17 +82,21 @@ class ChatBot:
 
     def generate_response_optimized(self, input_text):
         start_time = time.time()
+        self.rag_optimized()
+        info(f"Time for setting up rag_optimized: {round((time.time() - start_time), 2)}")
         llm_response = self.qa_chain_optimized({"query": input_text})
         end_time = time.time()
         inference_time = end_time - start_time
-        return llm_response['result'], round(inference_time,2)
+        return llm_response['result'], round(inference_time, 2)
 
     def generate_response_not_optimized(self, input_text):
         start_time = time.time()
+        self.rag_not_optimized()
+        info(f"Time for setting up rag_not_optimized: { round( (time.time()-start_time), 2)}")
         llm_response = self.qa_chain_not_optimized({"query": input_text})
         end_time = time.time()
         inference_time = end_time - start_time
-        return llm_response['result'], round(inference_time,2)
+        return llm_response['result'], round(inference_time, 2)
 
     def front_end(self, input_text):
         if "exit" in input_text.lower():
@@ -106,7 +110,8 @@ class ChatBot:
         self.conversation_history += f"You: {input_text}\n\n"
 
         resp_ipex, inference_ipex = self.generate_response_optimized(input_text)  # Your function to generate response
-        resp_no_ipex, inference_no_ipex = self.generate_response_optimized(input_text)  # Your function to generate response
+        resp_no_ipex, inference_no_ipex = self.generate_response_optimized(
+            input_text)  # Your function to generate response
         self.chat_logs.append(
             {
                 "query": input_text,
@@ -122,7 +127,7 @@ class ChatBot:
                                       f"inference_time (ipex)   : {inference_ipex} seconds\n\n"
                                       f"NextGenAI Law Bot (No-ipex): {resp_no_ipex}\n\n "
                                       f"inference_time (No-ipex)   : {inference_no_ipex} seconds\n\n"
-                                     )
+                                      )
 
         # Combine response and inference time
         display_text = f"{self.conversation_history}"
