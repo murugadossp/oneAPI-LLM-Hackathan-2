@@ -18,7 +18,7 @@ PERSISTENT_DIR_PATH = "/home/sdp/vector_db/chroma_db"
 class ChatBot:
     def __init__(self, chat_bot_model, db):
         # Create a text generation pipeline
-        self.conversation_history = None
+        self.conversation_history = ""
         self.pipe = pipeline(
             'text2text-generation',
             model=chat_bot_model.model,
