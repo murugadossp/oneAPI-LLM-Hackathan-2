@@ -1,0 +1,1 @@
+nohup ngrok http 7901 --log=stdout > ~/ngrok_logs/ngrok_gradio_hello_world.log 2>&1 &

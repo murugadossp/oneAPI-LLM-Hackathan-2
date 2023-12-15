@@ -1,0 +1,1 @@
+nohup python gradio_hello_world.py > ~/ngrok_logs/gradio_hello_world.log 2>&1 &
