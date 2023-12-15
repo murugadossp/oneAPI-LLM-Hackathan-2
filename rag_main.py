@@ -49,14 +49,15 @@ class ChatBot:
 
             # Check if the user entered 'EXIT' to stop the program
             if input_query.upper() == 'EXIT':
-                print("Exiting...")
+                info("Exiting...")
                 break
 
             # Execute the query using the QA chain
+            info("Executing query using the QA chain")
             llm_response = self.qa_chain({"query": input_query})
 
             # Print the response
-            print(llm_response['result'])
+            info(llm_response['result'])
 
     def launch_gradio_interface(self):
         interface = gr.Interface(
