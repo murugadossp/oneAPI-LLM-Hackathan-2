@@ -45,6 +45,7 @@ class ChatBot:
         self.db = Chroma(persist_directory=PERSISTENT_DIR_PATH, embedding_function=embeddings)
         self.llm_optimized = self._pipeline_mistral(bot_model=self.chat_bot_model_optimized)
         self.llm_not_optimized = self._pipeline_mistral(bot_model=self.chat_bot_model_not_optimized)
+        self.rag_chain()
         self.conversation_history = ""
 
 
@@ -98,15 +99,6 @@ class ChatBot:
                 | llm_chain_optimized
         )
 
-
-    def generate_response_optimized(self, input_text):
-        start_time = time.time()
-        self.rag_optimized()
-        info(f"Time for setting up rag_optimized: {round((time.time() - start_time), 2)}")
-        llm_response = self.qa_chain_optimized({"query": input_text})
-        end_time = time.time()
-        inference_time = end_time - start_time
-        return llm_response['result'], round(inference_time, 2)
 
     def generate_response(self, input_query, use_optimized_chain=True):
         start_time = time.time()
