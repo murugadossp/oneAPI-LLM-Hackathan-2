@@ -11,7 +11,7 @@ from langchain.vectorstores import Chroma
 from chatbot_model import ChatBotModel
 from loggers import *
 
-PERSISTENT_DIR_PATH = "/home/sdp/vector_db/chroma_db"
+PERSISTENT_DIR_PATH = "/home/sdp/vector_db/chroma_db_2"
 
 
 class InputDataLoader:
@@ -80,7 +80,7 @@ class InputDataLoader:
 
 
 if __name__ == '__main__':
-    input_loader = InputDataLoader()
+    input_loader = InputDataLoader(persistent_db_dir= "/home/sdp/vector_db/chroma_db2")
     input_loader.core()
 
 

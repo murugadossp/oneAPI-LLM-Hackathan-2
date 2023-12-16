@@ -15,7 +15,7 @@ from chatbot_model import ChatBotModel
 
 from loggers import *
 
-PERSISTENT_DIR_PATH = "/home/sdp/vector_db/chroma_db"
+PERSISTENT_DIR_PATH = "/home/sdp/vector_db/chroma_db2"
 
 
 class ChatBot:
